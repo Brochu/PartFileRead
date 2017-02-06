@@ -1,28 +1,39 @@
 ﻿using System;
+using System.IO;
 using PartFileRead_Core;
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        Puzzle[] puzzles = new Puzzle[]
-        {
-            new Puzzle(Guid.NewGuid().ToString()),
-            new Puzzle(Guid.NewGuid().ToString()),
-            new Puzzle(Guid.NewGuid().ToString()),
-            new Puzzle(Guid.NewGuid().ToString()),
-            new Puzzle(Guid.NewGuid().ToString())
-        };
-        ProgressionMap pmap = new ProgressionMap(Guid.NewGuid().ToString(), "DatMap");
+        bool create = false;
 
-        foreach (Puzzle p in puzzles)
+        if (create)
         {
-            p.StartingWord = "GORWS";
-            pmap.AddPuzzle(p);
+            // TO CREATE A MAP
+            Puzzle[] puzzles = new Puzzle[]
+            {
+                new Puzzle("Puzzle01"),
+                new Puzzle("Puzzle02"),
+                new Puzzle("Puzzle03"),
+                new Puzzle("Puzzle04"),
+                new Puzzle("Puzzle05")
+            };
+            ProgressionMap pmap = new ProgressionMap("ProgressionMap01", "DatMap");
+
+            foreach (Puzzle p in puzzles)
+            {
+                p.StartingWord = "GORWS";
+                pmap.AddPuzzle(p);
+            }
+
+            pmap.Save();
         }
-
-        pmap.Save();
-
-        Console.ReadKey();
+        else
+        {
+            // TO LOAD A CREATED MAP
+            ProgressionMap loaded = ProgressionMap.Load("DatMap");
+            Puzzle test = loaded.LoadPuzzleById("Puzzle01");
+        }
     }
 }

@@ -36,38 +36,27 @@ namespace PartFileRead_Core
             using (BinaryWriter bw = new BinaryWriter(fs))
             {
                 byte[] headerBuffer = _header.GetBuffer();
+
                 bw.Write(_header.Size);
-
-                for(long i = 0; i < headerBuffer.Length; ++i)
-                {
-                    fs.WriteByte(headerBuffer[i]);
-                    ++fs.Position;
-                }
-
-                for(long j = 0; j < data.Length; ++j)
-                {
-                    fs.WriteByte(data[j]);
-                    ++fs.Position;
-                }
+                bw.Write(headerBuffer);
+                bw.Write(data);
             }
         }
 
         public void LoadHeader()
         {
             using(FileStream fs = File.Open(_filepath, FileMode.Open, FileAccess.Read))
+            using (BinaryReader br = new BinaryReader(fs))
             {
-                using (BinaryReader br = new BinaryReader(fs))
-                {
-                    byte[] headerData = new byte[br.ReadInt64()];
-                    br.Read(headerData, sizeof(long), headerData.Length);
+                byte[] headerData = new byte[br.ReadInt64()];
+                br.Read(headerData, 0, headerData.Length);
 
-                    _header = BinaryFileHeader.Parse(headerData);
-                }
+                _header = BinaryFileHeader.Parse(headerData);
             }
             _ready = true;
         }
 
-        public void AddHeaderEntry(string name, long offset, int size)
+        public void AddHeaderEntry(string name, long offset, long size)
         {
             _header.AddEntry(name, offset, size);
         }
@@ -79,11 +68,14 @@ namespace PartFileRead_Core
 
         public byte[] LoadEntry(string name)
         {
-            byte[] result = new byte[_header.GetSizeForEntry(name)];
-            FileStream fs = File.Open(_filepath, FileMode.Open, FileAccess.Read);
-            fs.Seek(_header.Size + _header.GetOffsetForEntry(name), SeekOrigin.Begin);
-            fs.Read(result, 0, result.Length);
+            if (!_ready) return new byte[0];
 
+            byte[] result = new byte[_header.GetSizeForEntry(name)];
+            using (FileStream fs = File.Open(_filepath, FileMode.Open, FileAccess.Read))
+            {
+                fs.Seek(_header.Size + _header.GetOffsetForEntry(name), SeekOrigin.Begin);
+                fs.Read(result, 0, result.Length);
+            }
             return result;
         }
     }

@@ -47,6 +47,25 @@ namespace PartFileRead_Core
             BinaryFileHeader header = new BinaryFileHeader();
             header._size = headerData.Length;
             header._database = new Dictionary<string, HeaderEntry>();
+
+            using (MemoryStream ms = new MemoryStream(headerData))
+            using (BinaryReader br = new BinaryReader(ms))
+            {
+                int entryCount = br.ReadInt32();
+
+                string name;
+                long offset;
+                long size;
+                for (int i = 0; i < entryCount; ++i)
+                {
+                    name = br.ReadString();
+                    offset = br.ReadInt64();
+                    size = br.ReadInt64();
+
+                    header._database.Add(name, new HeaderEntry(offset, size));
+                }
+            }
+
             return header;
         }
 
@@ -88,7 +107,7 @@ namespace PartFileRead_Core
             return _database[name].Size;
         }
 
-        public void AddEntry(string name, long offset, int size)
+        public void AddEntry(string name, long offset, long size)
         {
             if (_database.ContainsKey(name))
             {

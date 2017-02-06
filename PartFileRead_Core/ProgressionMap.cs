@@ -56,15 +56,12 @@ namespace PartFileRead_Core
 
         public void Save()
         {
-            _file = new BinarySaveFile(_id);
+            _file = new BinarySaveFile(_name);
             byte[] filedata;
 
             using (MemoryStream ms = new MemoryStream())
             using (BinaryWriter bw = new BinaryWriter(ms))
             {
-                bw.Write(_id);
-                bw.Write(_name);
-
                 // save all puzzle, add header entry for each puzzle
                 foreach (Puzzle p in _puzzles)
                 {
@@ -73,13 +70,37 @@ namespace PartFileRead_Core
                     bw.Write(p.SerializeBinary(out size));
                     _file.AddHeaderEntry(p.Id, offset, size);
                 }
+
+                long metaOffset = ms.Position;
+                bw.Write(_id);
+                bw.Write(_name);
+                long metaEndOffset = ms.Position;
+                _file.AddHeaderEntry("META", metaOffset, (metaEndOffset - metaOffset));
+
                 filedata = ms.GetBuffer();
             }
             _file.Save(filedata);
         }
 
-        public void Load()
+        public Puzzle LoadPuzzleById(string name)
         {
+            return Puzzle.DeserializeBinary(_file.LoadEntry(name));
+        }
+
+        public static ProgressionMap Load(string name)
+        {
+            ProgressionMap result = new ProgressionMap();
+            result._file = new BinarySaveFile(name);
+            result._file.LoadHeader();
+
+            using (MemoryStream ms = new MemoryStream(result._file.LoadEntry("META")))
+            using (BinaryReader br = new BinaryReader(ms))
+            {
+                result._id = br.ReadString();
+                result._name = br.ReadString();
+            }
+
+            return result;
         }
     }
 }

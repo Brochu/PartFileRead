@@ -42,17 +42,16 @@ namespace PartFileRead_Core
         {
             byte[] result;
             using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter bw = new BinaryWriter(ms))
             {
-                using (BinaryWriter bw = new BinaryWriter(ms))
+                bw.Write(_id);
+                bw.Write(_startWord);
+                bw.Write(_words.Count);
+                foreach (string w in _words)
                 {
-                    bw.Write(_id);
-                    bw.Write(_startWord);
-                    bw.Write(_words.Count);
-                    foreach (string w in _words)
-                    {
-                        bw.Write(w);
-                    }
+                    bw.Write(w);
                 }
+
                 result = ms.GetBuffer();
                 size = result.Length;
             }
@@ -64,18 +63,16 @@ namespace PartFileRead_Core
         {
             Puzzle result = new Puzzle();
             using (MemoryStream ms = new MemoryStream(data))
+            using (BinaryReader br = new BinaryReader(ms))
             {
-                using (BinaryReader br = new BinaryReader(ms))
-                {
-                    result._id = br.ReadString();
-                    result._startWord = br.ReadString();
+                result._id = br.ReadString();
+                result._startWord = br.ReadString();
 
-                    List<string> words = new List<string>();
-                    int wordsCount = br.ReadInt32();
-                    for (int i = 0; i < wordsCount; ++i)
-                    {
-                        words.Add(br.ReadString());
-                    }
+                result._words = new List<string>();
+                int wordsCount = br.ReadInt32();
+                for (int i = 0; i < wordsCount; ++i)
+                {
+                    result._words.Add(br.ReadString());
                 }
             }
             return result;
