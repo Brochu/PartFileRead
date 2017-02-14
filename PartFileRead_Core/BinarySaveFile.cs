@@ -73,7 +73,8 @@ namespace PartFileRead_Core
             byte[] result = new byte[_header.GetSizeForEntry(name)];
             using (FileStream fs = File.Open(_filepath, FileMode.Open, FileAccess.Read))
             {
-                fs.Seek(_header.Size + _header.GetOffsetForEntry(name), SeekOrigin.Begin);
+                // We need to offset for header size (long) + header + offet for entry
+                fs.Seek(sizeof(long) + _header.Size + _header.GetOffsetForEntry(name), SeekOrigin.Begin);
                 fs.Read(result, 0, result.Length);
             }
             return result;
