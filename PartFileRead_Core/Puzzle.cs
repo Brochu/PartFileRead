@@ -80,9 +80,43 @@ namespace PartFileRead_Core
 
         private List<string> ComputeWordList(string start)
         {
-            //TODO: Actual algo
-            return new List<string>()
-            { "ROW", "SOW", "GROW", "ROWS", "GROWS" };
+            return ComputePermutations(start);
+        }
+
+        private static List<string> ComputePermutations(string s)
+        {
+            int n = s.Length;
+            char[] a = new char[n];
+            for (int i = 0; i < n; i++)
+            {
+                a[i] = s[i];
+            }
+
+            List<string> words = new List<string>();
+            InnerPermutations(a, n, ref words);
+            return words;
+        }
+
+        private static void InnerPermutations(char[] a, int n, ref List<string> words)
+        {
+            if (n == 1) {
+                words.Add(new string(a));
+                return;
+            }
+            for (int i = 0; i < n; i++)
+            {
+                swap(a, i, n-1);
+                InnerPermutations(a, n-1, ref words);
+                swap(a, i, n-1);
+            }
+        }  
+
+        // swap the characters at indices i and j
+        private static void swap(char[] a, int i, int j)
+        {
+            char c = a[i];
+            a[i] = a[j];
+            a[j] = c;
         }
     }
 }

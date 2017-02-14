@@ -6,6 +6,7 @@ namespace PartFileRead_Core
 {
     public class BinaryFileHeader
     {
+        #region Header Entry Structure
         public struct HeaderEntry
         {
             public long Offset
@@ -27,6 +28,7 @@ namespace PartFileRead_Core
                 _size = size;
             }
         }
+        #endregion
 
         public long Size
         {
